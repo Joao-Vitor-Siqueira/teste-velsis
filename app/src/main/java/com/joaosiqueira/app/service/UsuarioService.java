@@ -3,6 +3,7 @@ package com.joaosiqueira.app.service;
 import com.joaosiqueira.app.dto.UsuarioRequest;
 import com.joaosiqueira.app.dto.UsuarioResponse;
 import com.joaosiqueira.app.exception.EmailJaCadastradoException;
+import com.joaosiqueira.app.exception.UsuarioNaoEncontradoException;
 import com.joaosiqueira.app.model.Usuario;
 import com.joaosiqueira.app.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -33,5 +34,16 @@ public class UsuarioService {
                 usuarioCadastrado.getId(),
                 usuarioCadastrado.getNome(),
                 usuarioCadastrado.getEmail());
+    }
+
+    public UsuarioResponse buscarPorId(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException(String.valueOf(id)));
+
+        return new UsuarioResponse(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail()
+        );
     }
 }

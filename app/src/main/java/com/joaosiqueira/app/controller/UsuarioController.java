@@ -3,14 +3,12 @@ package com.joaosiqueira.app.controller;
 import com.joaosiqueira.app.dto.UsuarioRequest;
 import com.joaosiqueira.app.dto.UsuarioResponse;
 import com.joaosiqueira.app.exception.EmailJaCadastradoException;
+import com.joaosiqueira.app.exception.UsuarioNaoEncontradoException;
 import com.joaosiqueira.app.model.Usuario;
 import com.joaosiqueira.app.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
 @RestController
@@ -28,4 +26,15 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Long id) {
+        try {
+            UsuarioResponse usuarioCadastrado = usuarioService.buscarPorId(id);
+            return ResponseEntity.status(HttpStatus.OK).body(usuarioService.buscarPorId(id));
+        } catch (UsuarioNaoEncontradoException ex){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
 }
