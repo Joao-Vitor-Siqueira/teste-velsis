@@ -11,9 +11,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,6 +45,14 @@ class UsuarioServiceTest {
     private final String EMAIL = "joao@email.com";
     private final String SENHA = "123456";
 
+    private Usuario criarNomeUsuario(String nome) {
+        Usuario usuario = new Usuario(
+                nome,
+                nome.toLowerCase().replace(" ", "") + "@email.com",
+                "senha"
+        );
+        return usuario;
+    }
 
     @Test
     void cadastroDeUsuarioComSucesso() {
@@ -112,5 +125,41 @@ class UsuarioServiceTest {
                 UsuarioNaoEncontradoException.class,
                 () -> usuarioService.buscarPorId(1L)
         );
+    }
+
+    @Test
+    void listarUsuariosSemFiltro() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Usuario usuario1 = criarNomeUsuario("João Vitor");
+        Usuario usuario2 = criarNomeUsuario("Pedro Silva");
+        Usuario usuario3 = criarNomeUsuario("Maria Silva");
+
+        ReflectionTestUtils.setField(usuario1, "id", 1L);
+        ReflectionTestUtils.setField(usuario2, "id", 2L);
+        ReflectionTestUtils.setField(usuario3, "id", 3L);
+
+        Page<Usuario> paginaUsuarios =
+                new PageImpl<>(List.of(usuario1, usuario2, usuario3));
+
+
+        when(usuarioRepository.findAll(pageable))
+                .thenReturn(paginaUsuarios);
+
+
+        Page<UsuarioResponse> response =
+                usuarioService.listarUsuarios(null, pageable);
+
+
+        assertEquals(3, response.getTotalElements());
+        assertEquals("João Vitor",
+                response.getContent().get(0).nome());
+        assertEquals("Pedro Silva",
+                response.getContent().get(1).nome());
+        assertEquals("Maria Silva",
+                response.getContent().get(2).nome());
+
+        verify(usuarioRepository).findAll(pageable);
     }
 }
