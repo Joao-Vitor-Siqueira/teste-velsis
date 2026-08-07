@@ -162,4 +162,36 @@ class UsuarioServiceTest {
 
         verify(usuarioRepository).findAll(pageable);
     }
+
+    @Test
+    void listarUsuariosComFiltro() {
+        String filtro = "silva";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Usuario usuario2 = criarNomeUsuario("Pedro Silva");
+        Usuario usuario3 = criarNomeUsuario("Maria Silva");
+
+        ReflectionTestUtils.setField(usuario2, "id", 2L);
+        ReflectionTestUtils.setField(usuario3, "id", 3L);
+
+        Page<Usuario> paginaUsuarios =
+                new PageImpl<>(List.of(usuario2, usuario3));
+
+        when(usuarioRepository.findByNomeContainingIgnoreCase(filtro, pageable))
+                .thenReturn(paginaUsuarios);
+
+        Page<UsuarioResponse> response =
+                usuarioService.listarUsuarios(filtro, pageable);
+
+
+        assertEquals(2, response.getTotalElements());
+        assertEquals("Pedro Silva",
+                response.getContent().get(0).nome());
+        assertEquals("Maria Silva",
+                response.getContent().get(1).nome());
+
+        verify(usuarioRepository).findByNomeContainingIgnoreCase(filtro, pageable);
+    }
+
 }
