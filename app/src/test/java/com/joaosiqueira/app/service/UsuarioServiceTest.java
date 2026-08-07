@@ -62,4 +62,21 @@ class UsuarioServiceTest {
         verify(usuarioRepository).save(any(Usuario.class));
         verify(emailService).enviarEmail("joao@email.com");
     }
+
+    @Test
+    void emailJaCadastrado() {
+        UsuarioRequest request =
+                new UsuarioRequest("João", "joao@email.com", "123456");
+
+        when(usuarioRepository.existsByEmail(request.email()))
+                .thenReturn(true);
+
+        assertThrows(
+                EmailJaCadastradoException.class,
+                () -> usuarioService.createUsuario(request)
+        );
+
+        verify(usuarioRepository, never()).save(any());
+        verify(emailService, never()).enviarEmail(any());
+    }
 }
