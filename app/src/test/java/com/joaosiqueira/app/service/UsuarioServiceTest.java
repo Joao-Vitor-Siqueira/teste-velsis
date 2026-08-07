@@ -3,6 +3,7 @@ package com.joaosiqueira.app.service;
 import com.joaosiqueira.app.dto.UsuarioRequest;
 import com.joaosiqueira.app.dto.UsuarioResponse;
 import com.joaosiqueira.app.exception.EmailJaCadastradoException;
+import com.joaosiqueira.app.exception.UsuarioNaoEncontradoException;
 import com.joaosiqueira.app.model.Usuario;
 import com.joaosiqueira.app.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
@@ -88,7 +89,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void buscarUsuarioExistentePorId(){
+    void buscarUsuarioExistentePorId() {
         Usuario usuario = new Usuario(NOME, EMAIL, SENHA);
         ReflectionTestUtils.setField(usuario, "id", 1L);
 
@@ -101,5 +102,15 @@ class UsuarioServiceTest {
         assertEquals(1L, response.id());
         assertEquals("João", response.nome());
 
+    }
+
+    @Test
+    void buscarUsuarioInexistentePorId() {
+        when(usuarioRepository.findById(1L))
+                .thenReturn(Optional.empty());
+        assertThrows(
+                UsuarioNaoEncontradoException.class,
+                () -> usuarioService.buscarPorId(1L)
+        );
     }
 }
