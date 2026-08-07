@@ -46,12 +46,11 @@ class UsuarioServiceTest {
     private final String SENHA = "123456";
 
     private Usuario criarNomeUsuario(String nome) {
-        Usuario usuario = new Usuario(
+        return new Usuario(
                 nome,
                 nome.toLowerCase().replace(" ", "") + "@email.com",
                 "senha"
         );
-        return usuario;
     }
 
     @Test
