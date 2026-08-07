@@ -13,6 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,11 +35,16 @@ class UsuarioServiceTest {
     @InjectMocks
     private UsuarioService usuarioService;
 
+    private final String NOME = "João";
+    private final String EMAIL = "joao@email.com";
+    private final String SENHA = "123456";
+
+
     @Test
     void cadastroDeUsuarioComSucesso() {
 
         UsuarioRequest request =
-                new UsuarioRequest("João", "joao@email.com", "123456");
+                new UsuarioRequest(NOME, EMAIL, SENHA);
 
         when(usuarioRepository.existsByEmail(request.email()))
                 .thenReturn(false);
@@ -46,7 +53,7 @@ class UsuarioServiceTest {
                 .thenReturn("hashSenha");
 
         Usuario usuarioSalvo =
-                new Usuario("João", "joao@email.com", "hashSenha");
+                new Usuario(NOME, EMAIL, "hashSenha");
 
         ReflectionTestUtils.setField(usuarioSalvo, "id", 1L);
 
@@ -66,7 +73,7 @@ class UsuarioServiceTest {
     @Test
     void emailJaCadastrado() {
         UsuarioRequest request =
-                new UsuarioRequest("João", "joao@email.com", "123456");
+                new UsuarioRequest(NOME, EMAIL, SENHA);
 
         when(usuarioRepository.existsByEmail(request.email()))
                 .thenReturn(true);
@@ -78,5 +85,21 @@ class UsuarioServiceTest {
 
         verify(usuarioRepository, never()).save(any());
         verify(emailService, never()).enviarEmail(any());
+    }
+
+    @Test
+    void buscarUsuarioExistentePorId(){
+        Usuario usuario = new Usuario(NOME, EMAIL, SENHA);
+        ReflectionTestUtils.setField(usuario, "id", 1L);
+
+        when(usuarioRepository.findById(1L))
+                .thenReturn(Optional.of(usuario));
+
+        UsuarioResponse response =
+                usuarioService.buscarPorId(1L);
+
+        assertEquals(1L, response.id());
+        assertEquals("João", response.nome());
+
     }
 }
