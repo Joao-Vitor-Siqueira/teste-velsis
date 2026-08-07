@@ -8,6 +8,8 @@ import com.joaosiqueira.app.model.Usuario;
 import com.joaosiqueira.app.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -45,5 +47,22 @@ public class UsuarioService {
                 usuario.getNome(),
                 usuario.getEmail()
         );
+    }
+
+    public Page<UsuarioResponse> listarUsuarios(String nome, Pageable pageable) {
+
+        Page<Usuario> usuarios;
+
+        if (nome == null || nome.isBlank()) {
+            usuarios = usuarioRepository.findAll(pageable);
+        } else {
+            usuarios = usuarioRepository.findByNomeContainingIgnoreCase(nome, pageable);
+        }
+
+        return usuarios.map(usuario -> new UsuarioResponse(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail()
+        ));
     }
 }

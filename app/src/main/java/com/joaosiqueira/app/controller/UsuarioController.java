@@ -7,6 +7,8 @@ import com.joaosiqueira.app.exception.UsuarioNaoEncontradoException;
 import com.joaosiqueira.app.model.Usuario;
 import com.joaosiqueira.app.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -37,4 +39,13 @@ public class UsuarioController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<Page<UsuarioResponse>> listarUsuarios(
+            @RequestParam(required = false) String nome,
+            Pageable pageable) {
+
+        return ResponseEntity.ok(
+                usuarioService.listarUsuarios(nome, pageable)
+        );
+    }
 }
